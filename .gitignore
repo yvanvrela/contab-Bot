@@ -9,3 +9,4 @@ chats
 *.xlsx
 *.ipynb.env
 src/temp/
+.env
