@@ -39,6 +39,10 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
   - Se solucionó un error de colisión de zonas horarias al inicializar la aplicación. Se forzó la actualización de `APScheduler` a la versión `3.11.3` para dar soporte a objetos de tiempo nativos (`zoneinfo`) de Python 3.11+, permitiendo que el Cron Job interno inicie correctamente sin depender de `pytz`.
 
 ### Cambiado
+- **Búsqueda Avanzada (Sprint 14)**:
+  - El motor de búsqueda por nombres ahora ignora el orden de las palabras (ej. "perez juan" y "juan perez" devuelven el mismo resultado).
+  - El motor ignora acentos ingresados por el usuario, protegiendo estrictamente la letra "Ñ".
+  - Las palabras activadoras ("buscar", "ruc de", etc.) se extrajeron del código y ahora son completamente configurables mediante la variable `MAGIC_SEARCH_KEYWORDS` en el archivo `.env`.
 - **Arquitectura de Búsqueda (Sprint 13)**:
   - Se optimizó drásticamente el buscador de identidad: el bot ahora emplea "Cortocircuito Lógico" y solo acude a Internet (Web del MEC) si no logra encontrar a la persona en la ultrarrápida base de datos local (SQLite).
   - Se agregó una protección de *Timeout (5s)* a las peticiones del MEC, evitando que fallas o caídas de los servidores gubernamentales congelen los procesos del bot indefinidamente.

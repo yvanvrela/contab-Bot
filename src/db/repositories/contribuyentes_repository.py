@@ -1,5 +1,6 @@
 from typing import List, Dict, Optional
 from sqlalchemy.orm import Session
+from sqlalchemy import and_
 from sqlalchemy.exc import SQLAlchemyError
 from db.config.config_db import ContribuyenteModel
 import logging
@@ -53,12 +54,27 @@ class ContribuyentesRepository:
 
     def search_by_name(self, name_query: str, limit: int = 5) -> List[ContribuyenteModel]:
         """
-        Busca contribuyentes por nombre usando LIKE.
+        Busca contribuyentes por nombre usando LIKE, sin importar acentos ni orden.
         """
         try:
-            # SQLite LIKE is case-insensitive by default for ASCII characters.
-            query = f"%{name_query.upper()}%"
-            return self.session.query(ContribuyenteModel).filter(ContribuyenteModel.fullname.like(query)).limit(limit).all()
+            from sqlalchemy import and_, func
+            
+            def remove_accents_preserve_n(text: str) -> str:
+                return text.upper().replace('Á', 'A').replace('É', 'E').replace('Í', 'I').replace('Ó', 'O').replace('Ú', 'U')
+                
+            query_words = remove_accents_preserve_n(name_query).split()
+            
+            # Helper to remove accents in SQLite column for comparison
+            c = func.upper(ContribuyenteModel.fullname)
+            c = func.replace(c, 'Á', 'A')
+            c = func.replace(c, 'É', 'E')
+            c = func.replace(c, 'Í', 'I')
+            c = func.replace(c, 'Ó', 'O')
+            c = func.replace(c, 'Ú', 'U')
+            # No reemplazamos la Ñ
+            
+            conditions = [c.like(f"%{word}%") for word in query_words]
+            return self.session.query(ContribuyenteModel).filter(and_(*conditions)).limit(limit).all()
         except SQLAlchemyError as e:
             logger.error(f'Error al buscar por Nombre: {e}')
             return []
