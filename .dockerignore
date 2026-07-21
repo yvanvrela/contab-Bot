@@ -1,0 +1,43 @@
+# Git
+.git
+.gitignore
+
+# Entornos virtuales
+venv/
+env/
+.env
+
+# Caché de Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+
+# Bases de datos y Temporales
+src/db/config/*.db
+src/temp/
+archives/
+geckodriver.log
+*.log
+
+# Entornos IDE
+.vscode/
+.idea/
+.opencode/
+
+# Documentación de Sprints
+sprints/

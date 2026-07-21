@@ -1,3 +1,6 @@
+import logging
+
+logger = logging.getLogger(__name__)
 import pandas as pd
 import re
 from unicodedata import normalize
@@ -5,7 +8,7 @@ from pandas import notna
 import datetime
 from utils.html_build import build_html
 from utils.search_identity import search_contribuyente, search_identity_number
-from marangatu.consultar_ci import ConsultarCi
+from services.marangatu_scraper.consultar_ci import ConsultarCi
 
 MONTH_NAMES = {
     '1': 'Enero',
@@ -31,10 +34,10 @@ def get_file_name(data_file: dict) -> str:
     year = str(date.year)
     contribuyente_data = search_contribuyente(ruc)
 
-    if contribuyente_data['names'] != '':
-        file_name = f'{doc_register_type.title()} - {contribuyente_data["names"].title()} {contribuyente_data["surnames"].title()} - {month} - {year}'
-    else:
+    if contribuyente_data:
         file_name = f'{doc_register_type.title()} - {contribuyente_data["fullname"].title()} - {month} - {year}'
+    else:
+        file_name = f'{doc_register_type.title()} - RUC {ruc} - {month} - {year}'
 
     return file_name
 
@@ -72,10 +75,10 @@ def total_data_sum(column_data: dict) -> float:
     return column_data
 
 
-def to_html(path_xlsx: str) -> dict:
+def to_html(path_xlsx: str, out_dir: str = '.') -> dict:
     """
      response = {
-        'path_html': f'{file_name}.html',
+        'path_html': f'{out_dir}/{file_name}.html',
         'total_grav_10': total_grav_10,
         'total_grav_5': total_grav_5,
         'total_exenta': total_grav_exenta,
@@ -84,7 +87,7 @@ def to_html(path_xlsx: str) -> dict:
     """
     # Format file
     df = pd.read_excel(path_xlsx)
-    
+
     # Reemplaza acentos en todos los nombres de columnas
     df.columns = df.columns.str.normalize('NFKD').str.encode(
         'ascii', errors='ignore').str.decode('utf-8')
@@ -139,7 +142,7 @@ def to_html(path_xlsx: str) -> dict:
     #                 identity_number=ruc_reference)
 
     #             if contribuyente_data == None:
-    #                 print(ruc_reference)
+    #                 logger.info(f"Processing RUC: {ruc_reference}")
     #                 # Search Marangatu
     #                 contribuyente_data = ConsultarCi().search_ci(ci=ruc_reference)
     #                 rucs_column[ruc] = contribuyente_data['ci']
@@ -191,8 +194,12 @@ def to_html(path_xlsx: str) -> dict:
     timbrados: dict = file_content_dict['Timbrado del Comprobante']
 
     for column in timbrados:
-        timbrado = int(timbrados[column])
-        timbrados[column] = str(timbrado)
+        if pd.isna(timbrados[column]):  # Verifica si el valor es NaN
+            # O cualquier valor predeterminado que necesites
+            timbrados[column] = "0"
+        else:
+            timbrado = int(timbrados[column])
+            timbrados[column] = str(timbrado)
 
     # Correct format date d/m/y
     fechas = dict = file_content_dict['Fecha de Emision']
@@ -202,7 +209,7 @@ def to_html(path_xlsx: str) -> dict:
         fechas[column] = fecha
 
     # New columns order
-   
+
     new_order = [
         "Fecha de Emision", "RUC / No de Identificacion del Informado", "Nombre o Razon Social del Informado", "Tipo de Comprobante",
         "Timbrado del Comprobante", "Numero de Comprobante", "Monto Gravado 10%", "Gravado 10%", "IVA 10%", "Monto Gravado 5%", "Gravado 5%", "IVA 5%", "Monto No Gravado / Exento ", "Total Comprobante",
@@ -240,7 +247,8 @@ def to_html(path_xlsx: str) -> dict:
 
     html_content = build_html(title=file_name, table=table)
 
-    with open(f'{file_name}.html', 'w') as f:
+    output_path = f"{out_dir}/{file_name}.html"
+    with open(output_path, 'w', encoding='utf-8') as f:
         f.write(html_content)
 
     response = {
@@ -248,7 +256,7 @@ def to_html(path_xlsx: str) -> dict:
         'total_grav_5': total_grav_5,
         'total_exenta': total_exenta,
         'file_name': file_name,
-        'path_html': f'{file_name}.html',
+        'path_html': output_path,
     }
 
     return response

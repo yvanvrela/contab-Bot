@@ -1,9 +1,12 @@
 import re
 import os
 from zipfile import ZipFile, ZIP_DEFLATED
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
-PATH_R90 = 'Z:/r90'
+PATH_R90 = os.environ.get('PATH_R90', 'Z:/r90')
 
 
 def to_zip(path: str) -> zip:

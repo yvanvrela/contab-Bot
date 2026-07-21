@@ -1,6 +1,14 @@
-import os
+import logging
 
-PATH_DIR = 'Z:/r90/'
+logger = logging.getLogger(__name__)
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+PATH_DIR = os.environ.get('PATH_R90', 'Z:/r90')
+if not PATH_DIR.endswith('/'):
+    PATH_DIR += '/'
 
 
 def create_directory(dir_name: str, month=None, start_month=None, end_month=None):
@@ -8,15 +16,15 @@ def create_directory(dir_name: str, month=None, start_month=None, end_month=None
     dir = PATH_DIR+dir_name
 
     if os.path.exists(dir):
-        print('La carpeta ya existe!')
+        logger.info('La carpeta ya existe!')
     else:
         os.mkdir(dir)
-        print('Carpeta creada')
+        logger.info('Carpeta creada')
 
         if month is not None:
             subdir = dir + '/' + month
             os.mkdir(subdir)
-            print('Subcarpeta creada en: ', subdir)
+            logger.info(f'Subcarpeta creada en: {subdir}')
 
         if start_month and end_month is not None:
 
@@ -24,7 +32,7 @@ def create_directory(dir_name: str, month=None, start_month=None, end_month=None
                 dir_month = dir + '/' + '0'+str(i)
                 os.mkdir(dir_month)
 
-                print('Subcarpetas creada: ', dir_month)
+                logger.info(f'Subcarpetas creada: {dir_month}')
 
 
 def create_subdir(dir_name, start_month=None, end_month=None):

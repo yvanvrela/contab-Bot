@@ -1,114 +1,77 @@
-# from msilib.schema import
-import re
+import os
 import requests
+import logging
+from dotenv import load_dotenv
 
-from download_ruc_files import scan_files
-from download_ruc_files import read_file
+from db.config.config_db import session
+from db.repositories.contribuyentes_repository import ContribuyentesRepository
+from utils.constants import TaxAuthority
 
+load_dotenv()
+logger = logging.getLogger(__name__)
+
+URL_MEC_SEARCH = os.environ.get('URL_MEC_SEARCH', "https://www.mec.gov.py/cms_v4/denuncias/buscar_persona?documento=")
 
 def search_identity_number(identity_number: str) -> dict | None:
-    """
-        Recibe un numero de documento,
-        realiza la consulta a la página del mec,
-        retorna un diccionario con los datos.
-        :param '12345'
-        :return Dict
-        >>> search_identity_number('12345')
-        {
-            'ci':'12345',
-            'fullname':'Juan Perez',
-        }
-    """
     try:
+        link = f"{URL_MEC_SEARCH}{identity_number.strip()}"
+        # Se añade timeout de 5 segundos para evitar que el bot se congele si el MEC se cae
+        response = requests.get(link, timeout=5).json()
 
-        link = f"https://www.mec.gov.py/cms_v4/denuncias/buscar_persona?documento={identity_number.strip()}"
-
-        response = requests.get(link).json()
-
-        if response is not None:
-
+        if response is not None and 'id_persona' in response:
             data = {
                 'ci': response['id_persona'],
                 'fullname': f"{response['nombre_persona']}, {response['apellido_persona']}",
             }
-
             return data
         else:
-            return response
-    except:
-        print('error')
-
+            return None
+    except requests.exceptions.Timeout:
+        logger.error(f"Timeout (5s) al intentar conectar con el MEC para CI: {identity_number}")
+        return None
+    except Exception as e:
+        logger.error(f'Error searching MEC API: {e}')
+        return None
 
 def search_contribuyente(ruc: str) -> dict | None:
     """
-    Retorna un diccionario con los datos, si encuentra el ruc en los archivos
-    sino retorna un None.
-    Tambien puede discriminar guiones (-)
-    :param '12345-1' or '12345'
-    :return Dict
-    >>> search_contribuyente('12345')
-        {
-            'ci':'12345',
-            'fullname':'Juan Perez',
-            'ruc': '12345-1',
-        }
-    >>> search_contribuyente('12345')
-        None
+    Retorna un diccionario con los datos consultando a SQLite.
+    Puede discriminar guiones (-) y buscar por RUC o por CI.
     """
-
-    ruc_reference = ruc
+    ruc_reference = ruc.strip()
+    repo = ContribuyentesRepository(session)
 
     if '-' in ruc_reference:
-
-        # 12345-6 -> 5
-        end_ruc = re.findall('\d*(\d)-', ruc_reference)[0]
-
-        # 12345-6 -> 12345
-        ruc_reference = re.findall('(\d*)-', ruc_reference)[0]
+        # Search by RUC exactly
+        contribuyente_db = repo.get_by_ruc(ruc_reference)
     else:
-        # 12345 -> 5
-        end_ruc = re.findall('\d*(\d)', ruc_reference)[0]
+        # Search by CI exactly
+        contribuyente_db = repo.get_by_ci(ruc_reference)
 
-    path_data = scan_files(end_ruc=end_ruc)
-
-    data_contribuyentes = read_file(path_data)
-
-    filtered_data = list(filter(
-        lambda contribuyente: contribuyente['ci'] == ruc_reference, data_contribuyentes))
-
-    if filtered_data:
-        contribuyente = dict(filtered_data[0])
-
-        return contribuyente
-    else:
-        return None
-
+    if contribuyente_db:
+        return {
+            'ci': contribuyente_db.ci,
+            'fullname': contribuyente_db.fullname,
+            'ruc': contribuyente_db.ruc,
+            'status': contribuyente_db.status
+        }
+    return None
 
 def find_identity_data(identity_number: str) -> str:
     """
-        Busca el numero de documento en el listado de RUC de la SET y
-        en la pagina del MEC con dos funciones distinas.
-        Compara entre los datos y devuelve un mensaje dependiendo de
-        la información que obtuvo.
-
-        :param identity number
-        :return message
-
-        >>> find_identity_data('123456')
-        str -> 'Es contribuyente: (ruc) (fullname)'
-        str -> 'No es contribuyente: (ci) (fullname)'
-        str -> 'No encontré datos' 
+        Busca el numero de documento en SQLite (DNIT) y opcionalmente en el MEC si no lo encuentra.
     """
-
-    not_contribuyente = search_identity_number(identity_number)
-
+    # 1. Buscar en BD local de DNIT primero (Ultra rápido)
     contribuyente = search_contribuyente(identity_number)
-
+    
     if contribuyente is not None:
         return f'*Es contribuyente*\nRUC: `{contribuyente["ruc"]}`\nNombre: `{contribuyente["fullname"]}`\nEstado: `{contribuyente["status"]}`'
 
-    elif contribuyente is None and not_contribuyente is not None:
+    # 2. Si NO es contribuyente, recién ahí gastar tiempo consultando la web del MEC
+    not_contribuyente = search_identity_number(identity_number)
+    
+    if not_contribuyente is not None:
         return f'*No es contribuyente*\nCI: `{not_contribuyente["ci"]}`\nNombre: `{not_contribuyente["fullname"]}`'
 
-    elif contribuyente is None and not_contribuyente is None:
-        return 'No encontré datos...'
+    return 'No encontré datos...'
+

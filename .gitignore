@@ -7,4 +7,5 @@ chats
 *.log
 *.db
 *.xlsx
-*.ipynb
+*.ipynb.env
+src/temp/
