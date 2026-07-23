@@ -17,12 +17,12 @@ async def instant_search_number(update: Update, context):
     await update.message.reply_text(message_person_data, parse_mode=ParseMode.MARKDOWN)
 
 async def instant_search_name(update: Update, context):
-    """Búsqueda mágica por nombre parametrizada"""
+    """Búsqueda por nombre parametrizada"""
     text = update.message.text.strip()
     
     # Extraer el nombre de la consulta (ej. "buscar juan perez" -> "juan perez")
-    MAGIC_SEARCH_KEYWORDS = os.environ.get('MAGIC_SEARCH_KEYWORDS', 'buscar,ruc')
-    palabras = [k.strip() for k in MAGIC_SEARCH_KEYWORDS.split(',')]
+    SMART_SEARCH_KEYWORDS = os.environ.get('SMART_SEARCH_KEYWORDS', 'buscar,ruc')
+    palabras = [k.strip() for k in SMART_SEARCH_KEYWORDS.split(',')]
     palabras.sort(key=len, reverse=True) # Ordenar por longitud descendente para atrapar 'ruc de' antes que 'ruc'
     keywords_pattern = "|".join(palabras)
     match = re.match(rf"(?i)^(?:{keywords_pattern})\s+(.+)", text)

@@ -6,7 +6,7 @@ Mejorar el motor de búsqueda por nombres para que ignore el orden de las palabr
 ## Tareas Realizadas
 
 - [x] **Palabras Clave Configurables desde `.env`**
-   - Se añadió la variable `MAGIC_SEARCH_KEYWORDS` a los archivos de entorno.
+   - Se añadió la variable `SMART_SEARCH_KEYWORDS` a los archivos de entorno.
    - El enrutador `main.py` y el controlador `ruc_handlers.py` leen esta lista, la separan, la ordenan por longitud descendente (para evitar colisiones lógicas como "ruc de" vs "ruc") y generan un `Regex` dinámico en tiempo de ejecución.
 
 - [x] **Ignorar Acentos (Input Inteligente)**

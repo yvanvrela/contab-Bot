@@ -18,3 +18,6 @@ Este archivo actúa como un registro de descubrimientos técnicos ("quirks"), de
 
 ## 4. Estructura de "file_manager"
 - La función de convertir Excel a HTML del R-90 es la más completa. Es importante notar que descarga el documento localmente, llama a Pandas (vía `utils/html_convert.py`) y luego **borra** físicamente los documentos usando `os.remove` inmediatamente después de enviarlos al chat para no saturar el servidor.
+
+## 5. El problema cultural de los Acentos y la letra "Ñ"
+- En `src/db/repositories/contribuyentes_repository.py`, la búsqueda por nombre ignora los acentos. **No** se utilizaron librerías genéricas de Python para limpiar el texto porque estas librerías suelen transformar la "Ñ" en "N". En la cultura paraguaya, la letra Ñ es crítica (ej. apellidos como Núñez o Acuña). Por lo tanto, se programó un filtro manual (`func.replace`) explícitamente diseñado para mantener intacta la letra Ñ dentro de SQLite.

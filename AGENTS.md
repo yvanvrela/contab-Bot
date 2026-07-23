@@ -10,8 +10,10 @@
 - **Tests require `src/` context**: Do NOT run tests from the project root. The test files use imports assuming `src/` is the root module.
   - **Correct test command**: `cd src && python -m unittest discover tests/`
 - **Authorization Interceptor**: Any new handler added to `main.py` is automatically protected by `auth_handler.py` (Dispatcher Group `-1`). Users/Groups are auto-registered in SQLite but MUST have `is_active=True` manually set to interact with the bot.
+- **Search Keywords**: The bot dynamically builds regex listeners for name/RUC searches based on the `SMART_SEARCH_KEYWORDS` variable from `.env`. Do not hardcode search triggers in `main.py`.
 
 ## Architectural Constraints
+- **Database Concurrency**: The SQLite connection in `src/db/config/config_db.py` MUST use `scoped_session` and `PRAGMA journal_mode=WAL`. Never change this to a standard `Session()`, or the bot will deadlock (`This session is in 'prepared' state`) during heavy concurrent bulk inserts.
 - **Asynchronous Execution (`python-telegram-bot>=20.0`)**: 
   - All handlers and scheduled jobs must be `async def`.
   - **CRITICAL**: All blocking operations (SQLAlchemy queries, Selenium scraping, Pandas file processing) MUST be wrapped in `await asyncio.to_thread(...)` to avoid freezing the Telegram event loop.

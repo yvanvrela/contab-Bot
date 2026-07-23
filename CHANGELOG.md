@@ -21,7 +21,7 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1
 - Planificación del **Sprint 12 (Dockerización)** estructurada en sub-fases dentro de `sprints/sprint-12/`.
 - Archivo de planificación `sprint-11-migracion-asincrona.md` detallando los pasos para escalar la librería de Telegram a la versión 20+ (soporte multitarea).
 - Archivo de planificación `sprint-10-estabilizar-selenium.md` para la futura refactorización y blindaje de las rutinas de automatización web (Marangatu).
-- **Búsqueda Mágica (Sprint 8)**:
+- **Búsqueda por Nombre y RUC (Sprint 8)**:
   - El bot ahora detecta automáticamente si se envía un número suelto (Ej: `123456` o `123456-7`) al grupo y responde inmediatamente con los datos fiscales de esa persona. No hace falta usar el comando `/buscarci`.
   - El bot ahora acepta búsquedas por nombre escribiendo `buscar [nombre]` o `ruc [nombre]`. Buscará en la base de datos de 2 millones de personas usando el operador `LIKE` y devolverá los 5 resultados más cercanos, siempre formateados en MAYÚSCULAS.
 - Archivo de planificación `sprint-7-optimizacion-bd-rucs.md` para migrar y optimizar el guardado y consulta de datos del DNIT (RUCs) en memoria hacia SQLite.

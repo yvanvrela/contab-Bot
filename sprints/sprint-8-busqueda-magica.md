@@ -1,4 +1,4 @@
-# Sprint 8: Búsqueda Mágica de RUCs y Nombres
+# Sprint 8: Búsqueda por Nombre y RUC de RUCs y Nombres
 
 ## Objetivo
 Mejorar la Experiencia de Usuario (UX) permitiendo que Benito detecte automáticamente cédulas, RUCs o nombres enviados en el chat general sin depender de la fricción del comando `/buscarci`. Además, incorporar el motor de búsqueda por similitud de nombres.
@@ -14,7 +14,7 @@ Queremos lograr un modelo "Spotlight": Escribir un número o nombre en el chat y
    - Se capturó mediante Regex en `main.py` para ignorar la fricción del comando `/buscarci`.
    - Ahora si un usuario escribe un número puro, el bot salta directamente a la consulta instantánea.
 
-- [x] **Implementar "Búsqueda Mágica por Nombre"**
+- [x] **Implementar "Búsqueda por Nombre y RUC por Nombre"**
    - Se añadió `search_by_name` usando `LIKE` en `contribuyentes_repository.py`.
    - Se creó `instant_search_name` en `src/handlers/ruc_handlers.py`.
    - Se configuró el Regex `(?i)^(?:buscar|ruc(?: de)?)\s+(.+)` para activarlo.

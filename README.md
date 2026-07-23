@@ -7,7 +7,7 @@ Automatiza el control de vencimiento de timbrados, la descarga de listados de RU
 
 ## Funciones Principales
 
-### Búsqueda Mágica de Contribuyentes (DNIT / SET)
+### Búsqueda por Nombre y RUC (DNIT / SET)
 Gracias a la indexación de más de 2 millones de contribuyentes en la base de datos interna, Benito responde en milisegundos a las consultas del equipo:
 - **Por Número:** Si simplemente envías un número de cédula (`1234567`) o un RUC (`1234567-8`) al chat, el bot responderá inmediatamente con la tarjeta del contribuyente (Nombre, RUC, Estado).
 - **Por Nombre:** Puedes escribir `buscar juan perez` o `ruc de juan` y Benito escaneará la base de datos devolviendo los 5 contribuyentes que más se acerquen al nombre.

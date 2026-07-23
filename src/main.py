@@ -80,8 +80,8 @@ def main():
     # Búsqueda Mágica por Número o Nombre (Evita usar el comando /buscarci)
     dp.add_handler(MessageHandler(filters.Regex(r"^\d{4,9}(?:-\d)?$"), instant_search_number))
     
-    MAGIC_SEARCH_KEYWORDS = os.environ.get('MAGIC_SEARCH_KEYWORDS', 'buscar,ruc')
-    palabras = [k.strip() for k in MAGIC_SEARCH_KEYWORDS.split(',')]
+    SMART_SEARCH_KEYWORDS = os.environ.get('SMART_SEARCH_KEYWORDS', 'buscar,ruc')
+    palabras = [k.strip() for k in SMART_SEARCH_KEYWORDS.split(',')]
     palabras.sort(key=len, reverse=True)
     keywords_pattern = "|".join(palabras)
     dp.add_handler(MessageHandler(filters.Regex(rf"(?i)^(?:{keywords_pattern})\s+(.+)"), instant_search_name))
