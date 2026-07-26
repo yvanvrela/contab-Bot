@@ -64,7 +64,7 @@ graph TD
     RepoLayer <-->|Consultas SQL Indexadas| DB_SQLite
     
     MarangatuScraper <-->|Automatización Web| SET_Website
-    RucDownloader <-->|Peticiones HTTP (BS4)| SET_Website
+    RucDownloader <-->|Peticiones HTTP con BS4| SET_Website
     FileProcessor <-->|Lee/Comprime/Formatea| NetworkDrive
     ChatGPTClient <-->|Prompts v1+| OpenAI
 ```
