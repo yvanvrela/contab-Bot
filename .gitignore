@@ -6,6 +6,8 @@ chats
 *.sh
 *.log
 *.db
+*.db-shm
+*.db-wal
 *.xlsx
 *.ipynb.env
 src/temp/

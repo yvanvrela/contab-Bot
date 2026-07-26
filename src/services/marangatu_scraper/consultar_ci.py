@@ -38,11 +38,11 @@ class ConsultarCi:
             # TAB to search the identification name
             input_identificacion.send_keys(Keys.TAB)
 
-            while (True):
-                input_fullname = bot.find_element(By.NAME, 'nombreRazonSocial')
-                fullname = input_fullname.get_attribute('value')
-                if fullname != '':
-                    break
+            wait_long = WebDriverWait(bot, 15)
+            wait_long.until(
+                lambda d: d.find_element(By.NAME, 'nombreRazonSocial').get_attribute('value') != ''
+            )
+            fullname = bot.find_element(By.NAME, 'nombreRazonSocial').get_attribute('value')
 
             bot.close()
 

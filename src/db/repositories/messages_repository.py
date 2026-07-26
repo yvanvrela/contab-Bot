@@ -11,7 +11,7 @@ class MessagesRepository():
 
     def add_message(self, message_data: MessageSchema) -> None:
         try:
-            message_db = TimbradosModel(**message_data.dict())
+            message_db = MessagesModel(**message_data.dict())
             self.session.add(message_db)
             self.session.commit()
             return True
